@@ -1,0 +1,43 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Удаление модуля - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Подтверждение удаления</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Вы уверены, что хотите удалить модуль <strong>"{{ object.title }}"</strong>?</p>
+                    
+                    <p class="text-muted">
+                        Этот модуль содержит <strong>{{ object.lessons.count }}</strong> уроков.
+                        Все уроки в этом модуле также будут удалены!
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Внимание!</strong> Это действие нельзя отменить.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash"></i> Да, удалить
+                            </button>
+                            <a href="{% url 'module_detail' course_pk=object.course.pk module_pk=object.pk %}" 
+                               class="btn btn-secondary btn-lg">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

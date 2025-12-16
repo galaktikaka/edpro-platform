@@ -1,0 +1,159 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Модули курса {{ course.title }} - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'course_list' %}">Все курсы</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'course_detail' course.pk %}">{{ course.title }}</a></li>
+            <li class="breadcrumb-item active">Модули</li>
+        </ol>
+    </nav>
+    
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Модули курса</h1>
+            <p class="lead">{{ course.title }}</p>
+        </div>
+        
+        {% if user == course.author %}
+        <a href="{% url 'module_create' course.pk %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Добавить модуль
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Список модулей -->
+    {% if modules %}
+    <div class="row">
+        {% for module in modules %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title">{{ module.title }}</h5>
+                            <p class="card-text">{{ module.description|truncatechars:150 }}</p>
+                        </div>
+                        <span class="badge bg-primary">Модуль {{ module.order }}</span>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between text-muted mb-2">
+                            <small>
+                                <i class="bi bi-clock"></i> {{ module.total_duration }} мин
+                            </small>
+                            <small>
+                                <i class="bi bi-journal-text"></i> {{ module.lesson_count }} уроков
+                            </small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'module_detail' course.pk module.pk %}" 
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-eye"></i> Просмотреть
+                            </a>
+                            
+                            {% if user == course.author %}
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'module_edit' course.pk module.pk %}" 
+                                   class="btn btn-outline-warning btn-sm">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'lesson_create' course.pk module.pk %}" 
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-plus"></i> Урок
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Создан: {{ module.created_at|date:"d.m.Y" }}</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Общая статистика -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Общая статистика курса</h5>
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <h3>{{ modules|length }}</h3>
+                    <p class="text-muted">модулей</p>
+                </div>
+                <div class="col-md-3">
+                    <h3>{{ total_lessons }}</h3>
+                    <p class="text-muted">уроков</p>
+                </div>
+                <div class="col-md-3">
+                    <h3>{{ total_duration }}</h3>
+                    <p class="text-muted">минут обучения</p>
+                </div>
+                <div class="col-md-3">
+                    <h3>{{ course.duration_hours }}</h3>
+                    <p class="text-muted">часов по плану</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Если модулей нет -->
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-folder-x display-1 text-muted mb-3"></i>
+            <h3>В курсе пока нет модулей</h3>
+            <p class="text-muted">Добавьте модули, чтобы структурировать материал курса</p>
+            
+            {% if user == course.author %}
+            <a href="{% url 'module_create' course.pk %}" class="btn btn-primary btn-lg mt-3">
+                <i class="bi bi-plus-circle"></i> Создать первый модуль
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Навигация -->
+    <div class="mt-4">
+        <a href="{% url 'course_detail' course.pk %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к курсу
+        </a>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Вычисляем общую статистику
+        let totalLessons = 0;
+        let totalDuration = 0;
+        
+        {% for module in modules %}
+        totalLessons += {{ module.lesson_count }};
+        totalDuration += {{ module.total_duration }};
+        {% endfor %}
+        
+        // Обновляем статистику
+        document.querySelectorAll('.total-lessons').forEach(el => {
+            el.textContent = totalLessons;
+        });
+        
+        document.querySelectorAll('.total-duration').forEach(el => {
+            el.textContent = totalDuration;
+        });
+    });
+</script>
+{% endblock %}

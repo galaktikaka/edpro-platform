@@ -1,0 +1,41 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Аналитика — EdPro{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Простая аналитика</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Выручка за последний месяц</h5>
+                <p class="display-6 mb-0">{{ revenue_last_month }} ₽</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Оплаченных заказов за месяц</h5>
+                <p class="display-6 mb-0">{{ orders_count_last_month }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="mb-3">Топ‑5 самых продаваемых курсов</h2>
+{% if top_courses %}
+    <ol>
+        {% for c in top_courses %}
+        <li>
+            {{ c.course__title }} — продано {{ c.total_sold }} раз
+        </li>
+        {% endfor %}
+    </ol>
+{% else %}
+    <p class="text-muted">Пока нет данных о продажах курсов.</p>
+{% endif %}
+{% endblock %}
+
+

@@ -1,0 +1,153 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Главная — EdPro{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-5">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-3">EdPro — платформа для развития навыков</h1>
+        <p class="lead">
+            Онлайн‑курсы от практикующих преподавателей: программирование, дизайн,
+            языки и многое другое. Выбирайте курс, учитесь в удобном темпе и
+            собирайте своё портфолио.
+        </p>
+        <ul class="list-unstyled mb-4">
+            <li>• Удобный выбор курсов по уровню и тематике</li>
+            <li>• Бесплатные и пробные программы для старта</li>
+            <li>• Истории студентов и реальные проекты</li>
+        </ul>
+        <a href="{% url 'course_list' %}" class="btn btn-primary btn-lg me-2">
+            Перейти к курсам
+        </a>
+        <a href="{% url 'contact' %}" class="btn btn-outline-primary btn-lg me-2">
+            Нужна помощь с выбором?
+        </a>
+        <a href="{% url 'course_recommendation' %}" class="btn btn-outline-secondary btn-lg">
+            Подбор курса
+        </a>
+    </div>
+    <div class="col-lg-6 text-lg-end mt-4 mt-lg-0">
+        <div class="card shadow-sm d-inline-block">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Краткая статистика платформы</h5>
+                <p class="mb-1"><strong>{{ total_courses }}</strong> доступных курсов</p>
+                <p class="mb-1"><strong>Онлайн‑формат</strong> — учитесь из любой точки мира</p>
+                <p class="mb-0"><strong>Поддержка</strong> — оперативные ответы на вопросы</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-5">
+
+<h2 class="mb-4">Популярные курсы</h2>
+<div class="row">
+    {% for course in featured_courses %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 course-card position-relative">
+            {% if course.is_popular %}
+            <span class="badge bg-warning text-dark popular-badge">
+                <i class="bi bi-star-fill"></i> Популярный
+            </span>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ course.title }}</h5>
+                <p class="card-text text-muted">{{ course.description|truncatechars:100 }}</p>
+                <div class="mb-2">
+                    {% if course.is_free %}
+                        <span class="badge bg-success"><i class="bi bi-gift-fill"></i> Бесплатный</span>
+                    {% else %}
+                        <span class="badge bg-primary">{{ course.price }} ₽</span>
+                    {% endif %}
+                    <span class="badge bg-light text-dark ms-1">{{ course.get_level_display }}</span>
+                </div>
+                <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-arrow-right"></i> Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>Пока нет курсов. Скоро здесь появятся первые программы обучения.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<hr class="my-5">
+
+<h2 class="mb-4">Бесплатные курсы и акции</h2>
+<p class="text-muted">
+    Для новых пользователей мы предлагаем бесплатные и пробные курсы, чтобы вы могли
+    попробовать формат EdPro перед покупкой.
+</p>
+<div class="row">
+    {% for course in free_courses %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 border-success course-card">
+            <div class="card-body">
+                <h5 class="card-title">{{ course.title }}</h5>
+                <p class="card-text text-muted">{{ course.description|truncatechars:100 }}</p>
+                <span class="badge bg-success mb-2"><i class="bi bi-gift-fill"></i> Бесплатный доступ</span>
+                <div>
+                    <a href="{% url 'course_detail' course.pk %}" class="btn btn-success btn-sm">
+                        <i class="bi bi-play-fill"></i> Начать обучение
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            В данный момент бесплатных курсов нет. Следите за новостями и розыгрышами на платформе EdPro.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<hr class="my-5">
+
+<h2 class="mb-4">Истории студентов</h2>
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Алексей, 21 год</h5>
+                <p class="card-text text-muted">
+                    Начал с базового курса по Python, собрал портфолио проектов и устроился на первую стажировку
+                    через 3 месяца.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Мария, 27 лет</h5>
+                <p class="card-text text-muted">
+                    Прошла курс по веб‑дизайну, сделала несколько учебных проектов и начала брать первые заказы на фрилансе.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Игорь, 34 года</h5>
+                <p class="card-text text-muted">
+                    Использует EdPro для повышения квалификации: каждый год проходит 1–2 новых курса и обновляет свои навыки.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-5">
+
+<h2 class="mb-4">Проекты студентов</h2>
+<p class="text-muted">
+    Посмотрите примеры учебных проектов, которые можно сделать после прохождения курсов на EdPro.
+    <a href="{% url 'projects' %}">Перейти к проектам студентов</a>.
+</p>
+{% endblock %}

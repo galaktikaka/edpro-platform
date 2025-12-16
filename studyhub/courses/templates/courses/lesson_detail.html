@@ -1,0 +1,390 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}{{ lesson.title }} - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'course_list' %}">Все курсы</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'course_detail' course.pk %}">{{ course.title }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'module_list' course.pk %}">Модули</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'module_detail' course.pk module.pk %}">{{ module.title }}</a></li>
+            <li class="breadcrumb-item active">{{ lesson.title }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Прогресс курса и модуля (для записанных студентов) -->
+    {% if user.is_authenticated and user != course.author and course_progress and module_progress %}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Прогресс модуля</h6>
+                    <div class="progress mb-2" style="height: 20px;">
+                        <div class="progress-bar bg-success module-progress-bar" role="progressbar" 
+                             style="width: {{ module_progress.percentage }}%;" 
+                             aria-valuenow="{{ module_progress.percentage }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ module_progress.percentage }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ module_progress.completed }}/{{ module_progress.total }} уроков пройдено
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Прогресс курса</h6>
+                    <div class="progress mb-2" style="height: 20px;">
+                        <div class="progress-bar bg-info course-progress-bar" role="progressbar" 
+                             style="width: {{ course_progress.percentage }}%;" 
+                             aria-valuenow="{{ course_progress.percentage }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ course_progress.percentage }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ course_progress.completed }}/{{ course_progress.total }} уроков пройдено
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Навигация между уроками -->
+    {% if previous_lesson or next_lesson %}
+    <div class="d-flex justify-content-between mb-4">
+        {% if previous_lesson %}
+        <a href="{% url 'lesson_detail' course.pk module.pk previous_lesson.pk %}" 
+           class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Предыдущий урок
+        </a>
+        {% else %}
+        <div></div>
+        {% endif %}
+        
+        <span class="badge bg-primary align-self-center">
+            Урок {{ lesson.order }} из {{ module.lessons.count }}
+        </span>
+        
+        {% if next_lesson %}
+        <a href="{% url 'lesson_detail' course.pk module.pk next_lesson.pk %}" 
+           class="btn btn-outline-primary">
+            Следующий урок <i class="bi bi-arrow-right"></i>
+        </a>
+        {% else %}
+        <div></div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Заголовок урока и кнопка отметки -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="card-title">{{ lesson.title }}</h1>
+                    <p class="card-text text-muted">
+                        Модуль: {{ module.title }} | Курс: {{ course.title }}
+                    </p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-info fs-6">{{ lesson.duration_minutes }} минут</span>
+                    
+                    <!-- Кнопка отметки прохождения -->
+                    {% if user.is_authenticated and user != course.author and course_progress %}
+                    <div class="mt-2">
+                        <button id="mark-completed-btn" 
+                                class="btn {% if user_progress.completed %}btn-success{% else %}btn-outline-success{% endif %} mark-completed-btn"
+                                data-lesson-id="{{ lesson.id }}">
+                            <i class="bi {% if user_progress.completed %}bi-check-circle-fill{% else %}bi-check-circle{% endif %}"></i>
+                            {% if user_progress.completed %}
+                                Пройден
+                            {% else %}
+                                Отметить как пройденный
+                            {% endif %}
+                        </button>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- В блоке с кнопкой автора: -->
+{% if user == course.author %}
+<div class="mt-2">
+    <a href="{% url 'lesson_edit' course.pk module.pk lesson.pk %}" 
+       class="btn btn-warning btn-sm">
+        <i class="bi bi-pencil"></i> Редактировать урок
+    </a>
+</div>
+{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Содержание урока -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">Содержание урока</h3>
+        </div>
+        <div class="card-body">
+            <div class="lesson-content">
+                {{ lesson.content|linebreaks }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Информация об уроке -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Информация об уроке</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><strong>Порядковый номер:</strong> {{ lesson.order }}</li>
+                        <li><strong>Продолжительность:</strong> {{ lesson.duration_minutes }} минут</li>
+                        <li><strong>Статус:</strong> 
+                            {% if lesson.is_published %}
+                            <span class="badge bg-success">Опубликован</span>
+                            {% else %}
+                            <span class="badge bg-warning">Черновик</span>
+                            {% endif %}
+                        </li>
+                        <li><strong>Дата создания:</strong> {{ lesson.created_at|date:"d.m.Y H:i" }}</li>
+                        <li><strong>Последнее обновление:</strong> {{ lesson.updated_at|date:"d.m.Y H:i" }}</li>
+                        {% if user_progress and user_progress.completed %}
+                        <li><strong>Пройден:</strong> 
+                            <span class="badge bg-success">Да</span>
+                            <small class="text-muted">({{ user_progress.completed_at|date:"d.m.Y H:i" }})</small>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Навигация</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'module_detail' course.pk module.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-list-ul"></i> Все уроки модуля
+                        </a>
+                        <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-journal-text"></i> Страница курса
+                        </a>
+                        
+                        {% if user == course.author %}
+                        <a href="{% url 'lesson_edit' course.pk module.pk lesson.pk %}" 
+                           class="btn btn-outline-warning">
+                            <i class="bi bi-pencil"></i> Редактировать урок
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<style>
+.lesson-content {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.lesson-content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.lesson-content p {
+    margin-bottom: 1rem;
+}
+
+.lesson-content ul, .lesson-content ol {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const markBtn = document.getElementById('mark-completed-btn');
+    
+    if (markBtn) {
+        markBtn.addEventListener('click', function() {
+            const lessonId = this.dataset.lessonId;
+            const isCompleted = this.classList.contains('btn-success');
+            const newCompleted = !isCompleted;
+            
+            // Показываем загрузку
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Обработка...';
+            this.disabled = true;
+            
+            // Отправляем AJAX запрос
+            fetch('{% url "mark_lesson_completed" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: `lesson_id=${lessonId}&completed=${newCompleted}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем кнопку
+                    if (data.completed) {
+                        this.classList.remove('btn-outline-success');
+                        this.classList.add('btn-success');
+                        this.innerHTML = '<i class="bi bi-check-circle-fill"></i> Пройден';
+                        
+                        // Показываем уведомление
+                        showToast('Успешно!', data.message, 'success');
+                    } else {
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-outline-success');
+                        this.innerHTML = '<i class="bi bi-check-circle"></i> Отметить как пройденный';
+                        
+                        // Показываем уведомление
+                        showToast('Успешно!', data.message, 'info');
+                    }
+                    
+                    // Обновляем прогресс на странице
+                    updateProgressBars(data);
+                } else {
+                    showToast('Ошибка!', data.error || 'Произошла ошибка', 'danger');
+                    this.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Ошибка!', 'Не удалось обновить статус урока', 'danger');
+                this.innerHTML = originalText;
+            })
+            .finally(() => {
+                this.disabled = false;
+            });
+        });
+    }
+    
+    function updateProgressBars(data) {
+        // Обновляем прогресс модуля
+        const moduleProgressBar = document.querySelector('.module-progress-bar');
+        if (moduleProgressBar && data.module_progress !== undefined) {
+            animateProgressBar(moduleProgressBar, data.module_progress);
+            
+            // Обновляем текст под прогресс-баром
+            const moduleText = moduleProgressBar.closest('.card-body').querySelector('.text-muted');
+            if (moduleText) {
+                moduleText.textContent = data.module_completed + '/' + data.module_total + ' уроков пройдено';
+            }
+        }
+        
+        // Обновляем прогресс курса
+        const courseProgressBar = document.querySelector('.course-progress-bar');
+        if (courseProgressBar && data.course_progress !== undefined) {
+            animateProgressBar(courseProgressBar, data.course_progress);
+            
+            // Обновляем текст под прогресс-баром
+            const courseText = courseProgressBar.closest('.card-body').querySelector('.text-muted');
+            if (courseText) {
+                courseText.textContent = data.course_completed + '/' + data.course_total + ' уроков пройдено';
+            }
+        }
+    }
+    
+    function animateProgressBar(progressBar, newValue) {
+        const currentValue = parseInt(progressBar.style.width) || 0;
+        const duration = 600;
+        const startTime = Date.now();
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const currentProgress = currentValue + (newValue - currentValue) * progress;
+            
+            progressBar.style.width = currentProgress + '%';
+            progressBar.textContent = Math.round(currentProgress) + '%';
+            progressBar.setAttribute('aria-valuenow', Math.round(currentProgress));
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+        
+        animate();
+    }
+    
+    function showToast(title, message, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <strong>${title}</strong><br>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(container);
+            container.appendChild(toast);
+        } else {
+            toastContainer.appendChild(toast);
+        }
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

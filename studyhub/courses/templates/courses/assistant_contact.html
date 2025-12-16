@@ -1,0 +1,43 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Вопрос онлайн‑помощнику — EdPro{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Задать вопрос онлайн‑помощнику</h1>
+<p class="text-muted mb-4">
+    Опишите свой вопрос и оставьте удобный для вас контакт (email, Telegram и т.п.).
+    Мы свяжемся с вами и поможем подобрать курс или решить проблему.
+</p>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-danger small">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="{{ form.contact.id_for_label }}">{{ form.contact.label }}</label>
+                {{ form.contact }}
+                {% if form.contact.errors %}
+                    <div class="text-danger small">{{ form.contact.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+                {{ form.message }}
+                {% if form.message.errors %}
+                    <div class="text-danger small">{{ form.message.errors }}</div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить вопрос</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

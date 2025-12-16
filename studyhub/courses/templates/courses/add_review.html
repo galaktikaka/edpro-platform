@@ -1,0 +1,98 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Добавить отзыв - {{ course.title }} - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Оставить отзыв о курсе</h2>
+                    <p class="text-center mb-0">
+                        <a href="{% url 'course_detail' course.pk %}" class="text-decoration-none">
+                            {{ course.title }}
+                        </a>
+                    </p>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Сообщения Django -->
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Общие ошибки формы -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Поле оценки (Radio buttons) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">{{ form.rating.label }}</label>
+                            <div class="border rounded p-3">
+                                {% for choice in form.rating %}
+                                <div class="form-check mb-2">
+                                    {{ choice.tag }}
+                                    <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                        {{ choice.choice_label }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.rating.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.rating.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Поле текста отзыва -->
+                        <div class="mb-4">
+                            <label for="{{ form.text.id_for_label }}" class="form-label fw-bold">
+                                {{ form.text.label }}
+                            </label>
+                            {{ form.text }}
+                            {% if form.text.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.text.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">{{ form.text.help_text }}</div>
+                        </div>
+                        
+                        <!-- Кнопки -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-star-fill"></i> Опубликовать отзыв
+                            </button>
+                            <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary">
+                                Отмена
+                            </a>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

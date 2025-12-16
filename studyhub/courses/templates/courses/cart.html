@@ -1,0 +1,70 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Корзина — EdPro{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Корзина</h1>
+
+{% if courses %}
+    <div class="table-responsive mb-4">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Курс</th>
+                    <th>Цена</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td>
+                        <strong>{{ course.title }}</strong><br>
+                        <small class="text-muted">{{ course.description|truncatechars:120 }}</small>
+                    </td>
+                    <td>
+                        {% if course.is_free %}
+                            <span class="badge bg-success">Бесплатный</span>
+                        {% else %}
+                            {{ course.price }} ₽
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <form method="post" action="{% url 'remove_from_cart' course.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                Удалить
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <p class="mb-1">Всего курсов: <strong>{{ courses|length }}</strong></p>
+            <p class="mb-0">Сумма к оплате: <strong>{{ total_amount }} ₽</strong></p>
+        </div>
+        <div>
+            <a href="{% url 'course_list' %}" class="btn btn-outline-secondary me-2">
+                Продолжить выбор курсов
+            </a>
+            <a href="{% url 'checkout' %}" class="btn btn-primary">
+                Оформить заказ
+            </a>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Ваша корзина пуста. Перейдите в раздел «Курсы», чтобы добавить программы обучения.
+    </div>
+    <a href="{% url 'course_list' %}" class="btn btn-primary">
+        Перейти к курсам
+    </a>
+{% endif %}
+{% endblock %}
+
+

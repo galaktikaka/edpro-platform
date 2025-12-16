@@ -1,0 +1,69 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}О платформе — EdPro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <h1 class="mb-4">О платформе EdPro</h1>
+        <p class="lead">
+            EdPro — это онлайн‑платформа для развития навыков и профессионального роста.
+            Мы объединяем студентов и опытных преподавателей, предлагая качественные курсы
+            по программированию, дизайну, языкам и другим направлениям.
+        </p>
+        
+        <h3 class="mt-5 mb-3">Наши преимущества</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-check-circle-fill text-success"></i> Удобный выбор</h5>
+                        <p class="card-text">Фильтры по уровню, категории и цене помогают найти подходящий курс</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-gift-fill text-primary"></i> Бесплатные курсы</h5>
+                        <p class="card-text">Пробные и бесплатные программы для начала обучения</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-people-fill text-info"></i> Опытные преподаватели</h5>
+                        <p class="card-text">Курсы ведут практикующие специалисты с реальным опытом</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-chat-dots-fill text-warning"></i> Поддержка</h5>
+                        <p class="card-text">Онлайн‑помощник и оперативная поддержка по любым вопросам</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h3 class="mt-5 mb-3">Как это работает</h3>
+        <ol class="list-group list-group-numbered">
+            <li class="list-group-item">Выберите интересующий курс или пройдите тест подбора</li>
+            <li class="list-group-item">Добавьте курс в корзину и оформите заказ</li>
+            <li class="list-group-item">Получите доступ к материалам и начните обучение</li>
+            <li class="list-group-item">Отслеживайте прогресс и получайте сертификаты</li>
+        </ol>
+        
+        <div class="mt-5 text-center">
+            <a href="{% url 'course_list' %}" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-book"></i> Перейти к курсам
+            </a>
+            <a href="{% url 'course_recommendation' %}" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-question-circle"></i> Подобрать курс
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

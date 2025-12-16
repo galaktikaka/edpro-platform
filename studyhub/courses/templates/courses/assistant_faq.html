@@ -1,0 +1,57 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Онлайн‑помощник — EdPro{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Онлайн‑помощник</h1>
+<p class="text-muted mb-4">
+    Выберите категорию, чтобы увидеть часто задаваемые вопросы. Если вы не нашли нужный ответ,
+    оставьте свой вопрос и контакт для связи — мы обязательно ответим.
+</p>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="list-group">
+            {% for cat in categories %}
+            <a href="?category={{ cat.id }}" class="list-group-item list-group-item-action {% if current_category and current_category.id == cat.id %}active{% endif %}">
+                {{ cat.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-8">
+        {% if current_category %}
+            <h3 class="mb-3">{{ current_category.name }}</h3>
+            {% if questions %}
+                <div class="accordion" id="faqAccordion">
+                    {% for q in questions %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ q.id }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ q.id }}">
+                                {{ q.question }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ q.id }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {{ q.answer|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">В этой категории пока нет вопросов.</p>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">Выберите категорию слева, чтобы увидеть вопросы.</p>
+        {% endif %}
+
+        <hr class="my-4">
+        <div class="alert alert-info">
+            Не нашли ответ на свой вопрос? <a href="{% url 'assistant_contact' %}" class="alert-link">Оставьте свой вопрос и контакт для связи</a>.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

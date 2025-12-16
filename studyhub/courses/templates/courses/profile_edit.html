@@ -1,0 +1,110 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Редактирование профиля - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-circle"></i> Редактирование профиля
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Отображение текущего аватара -->
+                        <div class="text-center mb-4">
+    {% if user.profile.avatar %}
+        <img src="{{ user.profile.avatar.url }}" 
+             alt="Аватар" 
+             class="rounded-circle mb-3"
+             style="width: 150px; height: 150px; object-fit: cover;">
+        <p class="text-muted">Текущий аватар</p>
+        
+        <!-- Кнопка для удаления аватара -->
+        <div class="mt-2">
+            <a href="{% url 'avatar_delete' %}" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i> Удалить аватар
+            </a>
+        </div>
+    {% else %}
+        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+             style="width: 150px; height: 150px;">
+            <i class="bi bi-person-fill text-muted" style="font-size: 4rem;"></i>
+        </div>
+        <p class="text-muted">Аватар не установлен</p>
+    {% endif %}
+</div>
+                        
+                        <!-- Поле аватара -->
+                        <div class="mb-3">
+                            <label for="{{ form.avatar.id_for_label }}" class="form-label">
+                                {{ form.avatar.label }}
+                            </label>
+                            {{ form.avatar }}
+                            {% if form.avatar.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.avatar.errors }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Рекомендуемый размер: 200x200 пикселей</div>
+                        </div>
+                        
+                        <!-- Поле "О себе" -->
+                        <div class="mb-3">
+                            <label for="{{ form.bio.id_for_label }}" class="form-label">
+                                {{ form.bio.label }}
+                            </label>
+                            {{ form.bio }}
+                            {% if form.bio.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.bio.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Поле веб-сайта -->
+                        <div class="mb-4">
+                            <label for="{{ form.website.id_for_label }}" class="form-label">
+                                {{ form.website.label }}
+                            </label>
+                            {{ form.website }}
+                            {% if form.website.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.website.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Кнопки -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'my_courses' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Сохранить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Информация о пользователе -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Информация о пользователе</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Имя пользователя:</strong> {{ user.username }}</li>
+                        <li><strong>Email:</strong> {{ user.email }}</li>
+                        <li><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y" }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

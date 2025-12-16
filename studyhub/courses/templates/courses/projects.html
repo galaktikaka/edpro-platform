@@ -1,0 +1,49 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Проекты студентов — EdPro{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Проекты студентов</h1>
+<p class="text-muted mb-4">
+    Несколько примеров учебных проектов, которые могут получить студенты после прохождения курсов.
+    В учебной версии эти проекты заданы статично.
+</p>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Веб‑приложение "Личный бюджет"</h5>
+                <p class="card-text text-muted">
+                    Студент разработал простое веб‑приложение на Django для отслеживания доходов и расходов.
+                    Реализованы категории трат, фильтры по датам и диаграмма расходов.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Портфолио‑сайт дизайнера</h5>
+                <p class="card-text text-muted">
+                    После курса по веб‑дизайну студент собрал свой первый портфолио‑сайт с примерами работ,
+                    отзывами клиентов и формой обратной связи.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Мобильный лендинг языковой школы</h5>
+                <p class="card-text text-muted">
+                    В рамках курса по вёрстке студент создал адаптивный лендинг языковой школы с блоками
+                    "Преимущества", "Преподаватели", "Отзывы" и формой записи.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

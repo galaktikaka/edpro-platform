@@ -1,0 +1,495 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}{{ course.title }} — EdPro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Основная информация о курсе -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h1>{{ course.title }}</h1>
+                {% if course.is_popular %}
+                <span class="badge bg-warning text-dark mb-2">
+                    <i class="bi bi-star-fill"></i> Популярный курс
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        <p class="lead">{{ course.description }}</p>
+        
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-info-circle"></i> Информация о курсе</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><i class="bi bi-person"></i> <strong>Автор:</strong> {{ course.author.username }}</p>
+                        <p><i class="bi bi-calendar"></i> <strong>Дата создания:</strong> {{ course.created_at|date:"d.m.Y" }}</p>
+                        <p><i class="bi bi-clock"></i> <strong>Продолжительность:</strong> {{ course.duration_hours }} часов</p>
+                    </div>
+                    <div class="col-md-6">
+                        {% if course.category %}
+                            <p><i class="bi bi-tag"></i> <strong>Категория:</strong> {{ course.category.name }}</p>
+                        {% endif %}
+                        <p><i class="bi bi-bar-chart"></i> <strong>Уровень:</strong> {{ course.get_level_display }}</p>
+                        <p>
+                            <i class="bi bi-currency-exchange"></i> <strong>Цена:</strong>
+                            {% if course.is_free %}
+                                <span class="badge bg-success"><i class="bi bi-gift-fill"></i> Бесплатный курс</span>
+                            {% else %}
+                                <span class="badge bg-primary fs-6">{{ course.price }} ₽</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок с модулями курса -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0">Структура курса</h3>
+            </div>
+            <div class="card-body">
+                {% if course.modules.all %}
+                    <p>Курс состоит из {{ course.modules.count }} модулей:</p>
+                    <div class="list-group">
+                        {% for module in course.modules.all %}
+                        <a href="{% url 'module_detail' course.pk module.pk %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ module.title }}</h5>
+                                <small>Модуль {{ module.order }}</small>
+                            </div>
+                            <p class="mb-1">{{ module.description|truncatechars:100 }}</p>
+                            <small>{{ module.lessons.count }} уроков</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-folder-x display-4 text-muted mb-3"></i>
+                        <h4>В курсе пока нет модулей</h4>
+                        <p class="text-muted">Модули помогут структурировать материал курса</p>
+                        
+                        {% if user == course.author %}
+                        <a href="{% url 'module_create' course.pk %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Создать первый модуль
+                        </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                <div class="mt-3">
+                    <a href="{% url 'module_list' course.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-list-ul"></i> Все модули курса
+                    </a>
+                    
+                    {% if user == course.author %}
+                    <a href="{% url 'module_create' course.pk %}" class="btn btn-success ms-2">
+                        <i class="bi bi-plus-circle"></i> Добавить модуль
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок прогресса пользователя -->
+        {% if user.is_authenticated and user != course.author and user_progress %}
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h4 class="mb-0">
+                    <i class="bi bi-graph-up"></i> Ваш прогресс в курсе
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-grow-1 me-3">
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-success progress-bar-striped {% if user_progress.percentage < 100 %}progress-bar-animated{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ user_progress.percentage }}%;" 
+                                         aria-valuenow="{{ user_progress.percentage }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        <span class="fw-bold">{{ user_progress.percentage }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-nowrap">
+                                <span class="badge bg-primary fs-6">
+                                    {{ user_progress.completed_lessons }}/{{ user_progress.total_lessons }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h3 class="text-success mb-0">{{ user_progress.completed_lessons }}</h3>
+                                        <small class="text-muted">Пройдено уроков</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h3 class="text-info mb-0">{{ user_progress.total_lessons|add:"-"|add:user_progress.completed_lessons }}</h3>
+                                        <small class="text-muted">Осталось уроков</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h3 class="text-warning mb-0">{{ user_progress.total_lessons }}</h3>
+                                        <small class="text-muted">Всего уроков</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 text-center">
+                        {% if user_progress.percentage == 100 %}
+                        <div class="alert alert-success border-0 shadow-sm">
+                            <i class="bi bi-trophy-fill display-4 text-warning mb-3"></i>
+                            <h5 class="alert-heading">Поздравляем!</h5>
+                            <p class="mb-0">Вы успешно завершили курс!</p>
+                        </div>
+                        {% elif user_progress.percentage >= 75 %}
+                        <div class="alert alert-info border-0 shadow-sm">
+                            <i class="bi bi-star-fill display-4 text-info mb-3"></i>
+                            <h5 class="alert-heading">Отличная работа!</h5>
+                            <p class="mb-0">Вы почти у цели!</p>
+                        </div>
+                        {% elif user_progress.percentage > 0 %}
+                        <div class="alert alert-primary border-0 shadow-sm">
+                            <i class="bi bi-arrow-right-circle-fill display-4 text-primary mb-3"></i>
+                            <h5 class="alert-heading">Продолжайте в том же духе!</h5>
+                            <p class="mb-0">Вы на верном пути</p>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning border-0 shadow-sm">
+                            <i class="bi bi-play-circle-fill display-4 text-warning mb-3"></i>
+                            <h5 class="alert-heading">Время начать!</h5>
+                            <p class="mb-0">Выберите первый урок</p>
+                            <a href="{% url 'module_list' course.pk %}" class="btn btn-success mt-2">
+                                <i class="bi bi-play-fill"></i> Начать обучение
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if user_progress.percentage > 0 and user_progress.percentage < 100 %}
+                <div class="mt-3">
+                    <a href="{% url 'module_list' course.pk %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right-circle"></i> Продолжить обучение
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Блок записи на курс / добавления в корзину -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">Хотите пройти этот курс?</h5>
+                        <p class="text-muted mb-0">{{ course.duration_hours }} часов обучения</p>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        {% if user_enrolled %}
+                        <div class="text-center">
+                            <span class="badge bg-success fs-6 p-2">
+                                <i class="bi bi-check-circle"></i> Вы записаны
+                            </span>
+                            <p class="small text-muted mt-1">Запись от {{ enrollment_date|date:"d.m.Y" }}</p>
+                        </div>
+                        {% else %}
+                        <div class="d-flex gap-2">
+                            <form method="post" action="{% url 'add_to_cart' course.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-cart-plus"></i> Добавить в корзину
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'quick_enroll' course.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-success btn-lg">
+                                    <i class="bi bi-pencil-square"></i> Записаться сразу
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                    <div>
+                        <a href="{% url 'login' %}?next={% url 'course_detail' course.pk %}" 
+                           class="btn btn-primary btn-lg me-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Войти для записи
+                        </a>
+                        <a href="{% url 'enroll' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-list-ul"></i> Все курсы
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок отзывов -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="bi bi-chat-left-text"></i> Отзывы о курсе
+                    {% if average_rating %}
+                    <span class="badge bg-primary ms-2">
+                        {{ average_rating }} ★ ({{ review_count }} отзывов)
+                    </span>
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="card-body">
+                
+                <!-- Кнопка добавления отзыва -->
+                {% if user.is_authenticated and not has_reviewed %}
+                <div class="mb-4 text-end">
+                    <a href="{% url 'add_review' course.pk %}" class="btn btn-success">
+                        <i class="bi bi-pencil"></i> Оставить отзыв
+                    </a>
+                </div>
+                {% elif user.is_authenticated and has_reviewed %}
+                <div class="alert alert-info mb-4">
+                    Вы уже оставили отзыв на этот курс. Спасибо!
+                </div>
+                {% endif %}
+                
+                <!-- Список отзывов -->
+                {% if reviews %}
+                <div class="row">
+                    {% for review in reviews %}
+                    <div class="col-12 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1">{{ review.user.username }}</h6>
+                                        <div class="text-warning">
+                                            {{ review.get_rating_stars }}
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ review.created_at|date:"d.m.Y H:i" }}
+                                    </small>
+                                </div>
+                                <p class="mb-0">{{ review.text }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-chat-left-text display-1 text-muted"></i>
+                    <p class="mt-3">Пока нет отзывов. Будьте первым!</p>
+                </div>
+                {% endif %}
+                
+            </div>
+        </div>
+                
+        <!-- Кнопки управления (видны только автору) -->
+        {% if user.is_authenticated and user == course.author %}
+            <hr>
+            <div class="btn-group" role="group">
+                <a href="{% url 'course_update' course.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+                <a href="{% url 'course_delete' course.pk %}" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash"></i> Удалить
+                </a>
+            </div>
+        {% endif %}
+        
+        <!-- Кнопка возврата -->
+        <div class="mt-4">
+            <a href="{% url 'course_list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Назад к списку курсов
+            </a>
+        </div>
+    </div>
+    
+    <!-- Правая колонка -->
+    <div class="col-lg-4">
+        <!-- Блок похожих курсов -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-star me-2"></i>Похожие курсы
+                </h5>
+                <p class="text-muted small mb-3">
+                    {% if course.category %}
+                        Другие курсы в категории "{{ course.category.name }}"
+                    {% else %}
+                        Рекомендуемые курсы для вас
+                    {% endif %}
+                </p>
+                
+                {% if similar_courses %}
+                    <div class="list-group list-group-flush">
+                        {% for similar in similar_courses %}
+                            <a href="{% url 'course_detail' similar.pk %}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ similar.title }}</h6>
+                                    <small class="text-muted">{{ similar.duration_hours }}ч</small>
+                                </div>
+                                <p class="mb-1 small text-muted">
+                                    {{ similar.description|truncatechars:80 }}
+                                </p>
+                                <small class="text-muted">
+                                    <i class="bi bi-person"></i> {{ similar.author.username }}
+                                </small>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-info-circle" style="font-size: 48px; color: #6c757d;"></i>
+                        <p class="text-muted mt-2">Похожих курсов не найдено</p>
+                        <a href="{% url 'course_list' %}" class="btn btn-sm btn-outline-primary">
+                            Посмотреть все курсы
+                        </a>
+                    </div>
+                {% endif %}
+                
+                {% if course.category %}
+                    <div class="mt-3 text-center">
+                        <a href="{% url 'course_list' %}?category={{ course.category.pk }}" 
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-filter"></i> Все курсы этой категории
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Дополнительная информация -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="bi bi-info-circle me-2"></i>Статистика курса
+                </h6>
+                <ul class="list-unstyled small">
+                    <li><i class="bi bi-calendar me-2"></i>Обновлен: {{ course.updated_at|date:"d.m.Y" }}</li>
+                    <li><i class="bi bi-clock me-2"></i>Продолжительность: {{ course.duration_hours }} часов</li>
+                    {% if course.category %}
+                        <li><i class="bi bi-tag me-2"></i>Категория: {{ course.category.name }}</li>
+                    {% endif %}
+                    {% if review_count %}
+                        <li><i class="bi bi-star me-2"></i>Отзывов: {{ review_count }}</li>
+                    {% endif %}
+                    {% if average_rating %}
+                        <li><i class="bi bi-star-fill me-2"></i>Рейтинг: {{ average_rating }} ★</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Информация об авторе -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="bi bi-person-circle me-2"></i>Об авторе
+                </h6>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-person-circle display-6 text-muted"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">{{ course.author.username }}</h6>
+                        <small class="text-muted">Автор курса</small>
+                    </div>
+                </div>
+                <p class="small text-muted">
+                    {% if course.author.courses.count > 1 %}
+                        Автор создал {{ course.author.courses.count }} курсов на платформе
+                    {% else %}
+                        Первый курс автора на платформе
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Рекомендации -->
+{% if similar_courses %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">Рекомендуем к изучению</h3>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for similar in similar_courses %}
+                    <div class="col">
+                        <div class="card h-100 similar-course-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <a href="{% url 'course_detail' similar.pk %}" 
+                                       class="text-decoration-none text-dark">
+                                        {{ similar.title }}
+                                    </a>
+                                </h5>
+                                <p class="card-text text-muted small">
+                                    {{ similar.description|truncatechars:120 }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-person"></i> {{ similar.author.username }}
+                                    </small>
+                                    <span class="badge bg-primary">
+                                        {{ similar.duration_hours }}ч
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'course_detail' similar.pk %}" 
+                                   class="btn btn-sm btn-outline-primary w-100">
+                                    Подробнее
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .similar-course-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #e9ecef;
+    }
+    
+    .similar-course-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .progress-bar {
+        transition: width 1s ease-in-out;
+    }
+</style>
+{% endblock %}

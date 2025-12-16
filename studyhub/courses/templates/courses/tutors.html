@@ -1,0 +1,52 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Преподаватели — EdPro{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Преподаватели платформы EdPro</h1>
+<p class="text-muted mb-4">
+    Здесь вы можете познакомиться с преподавателями, которые создают и ведут курсы на платформе.
+</p>
+
+{% if tutors %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for tutor in tutors %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-person-badge"></i>
+                        {{ tutor.user.username }}
+                    </h5>
+                    {% if tutor.bio %}
+                        <p class="card-text text-muted">{{ tutor.bio|truncatechars:140 }}</p>
+                    {% else %}
+                        <p class="card-text text-muted">Преподаватель ещё не заполнил информацию о себе.</p>
+                    {% endif %}
+                    <h6 class="mt-3">Курсы преподавателя:</h6>
+                    <ul class="small">
+                        {% with courses=tutor.user.courses.all %}
+                            {% if courses %}
+                                {% for course in courses %}
+                                <li>
+                                    <a href="{% url 'course_detail' course.pk %}">{{ course.title }}</a>
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="text-muted">Курсы пока не добавлены.</li>
+                            {% endif %}
+                        {% endwith %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Преподаватели пока не добавлены.
+    </div>
+{% endif %}
+{% endblock %}
+
+

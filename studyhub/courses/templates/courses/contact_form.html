@@ -1,0 +1,136 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Обратная связь - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Форма обратной связи</h2>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Сообщения Django -->
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Отображение общей ошибки формы -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Ручной рендеринг полей формы -->
+                        
+                        <!-- Поле имени -->
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                {{ form.name.label }}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.name.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">{{ form.name.help_text }}</div>
+                        </div>
+                        
+                        <!-- Поле email -->
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                {{ form.email.label }}
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.email.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">{{ form.email.help_text }}</div>
+                        </div>
+                        
+                        <!-- Поле выбора типа обращения -->
+                        <div class="mb-3">
+                            <label for="{{ form.contact_type.id_for_label }}" class="form-label">
+                                {{ form.contact_type.label }}
+                            </label>
+                            {{ form.contact_type }}
+                        </div>
+                        
+                        <!-- Поле сообщения -->
+                        <div class="mb-3">
+                            <label for="{{ form.message.id_for_label }}" class="form-label">
+                                {{ form.message.label }}
+                            </label>
+                            {{ form.message }}
+                            {% if form.message.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.message.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">{{ form.message.help_text }}</div>
+                        </div>
+                        
+                        <!-- Поле номера курса -->
+                        <div class="mb-3">
+                            <label for="{{ form.course_id.id_for_label }}" class="form-label">
+                                {{ form.course_id.label }}
+                            </label>
+                            {{ form.course_id }}
+                            {% if form.course_id.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.course_id.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Флажок подписки -->
+                        <div class="mb-3 form-check">
+                            {{ form.newsletter }}
+                            <label for="{{ form.newsletter.id_for_label }}" class="form-check-label">
+                                {{ form.newsletter.label }}
+                            </label>
+                        </div>
+                        
+                        <!-- Кнопки -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">
+                                Отправить сообщение
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary">
+                                Очистить форму
+                            </button>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

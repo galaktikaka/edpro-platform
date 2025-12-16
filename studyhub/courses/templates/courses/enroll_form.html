@@ -1,0 +1,93 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Запись на курс - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Запись на курс
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if form.fields.course.queryset.exists %}
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.course.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-journal-bookmark"></i> Выберите курс для записи
+                            </label>
+                            {{ form.course }}
+                            {% if form.course.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.course.errors }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Доступны только опубликованные курсы, на которые вы еще не записаны.
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'course_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Назад к курсам
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Записаться
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-check-all display-1 text-success mb-3"></i>
+                        <h4>Поздравляем!</h4>
+                        <p class="lead">Вы уже записаны на все доступные курсы.</p>
+                        <a href="{% url 'course_list' %}" class="btn btn-primary mt-3">
+                            <i class="bi bi-list-ul"></i> Посмотреть все курсы
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Информация о записях -->
+            {% if request.user.enrollment_set.exists %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-card-checklist"></i> Мои записи на курсы
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for enrollment in request.user.enrollment_set.all %}
+                        <a href="{% url 'course_detail' enrollment.course.pk %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ enrollment.course.title }}</h6>
+                                <small>{{ enrollment.enrolled_at|date:"d.m.Y" }}</small>
+                            </div>
+                            <p class="mb-1 text-muted small">
+                                {{ enrollment.course.description|truncatechars:100 }}
+                            </p>
+                            <small>
+                                {% if enrollment.completed %}
+                                <span class="badge bg-success">Завершено</span>
+                                {% else %}
+                                <span class="badge bg-warning">В процессе</span>
+                                {% endif %}
+                            </small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

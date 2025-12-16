@@ -1,0 +1,81 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Контакты - StudyHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1 class="mb-4">📞 Контакты</h1>
+        <p class="lead">Мы всегда рады помочь вам с выбором курса или ответить на вопросы!</p>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">📨 Электронная почта</h5>
+                <p class="card-text">
+                    <i class="bi bi-envelope-fill"></i>
+                    <a href="mailto:{{ contacts.email }}" class="text-decoration-none">
+                        {{ contacts.email }}
+                    </a>
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">📱 Телефоны</h5>
+                <p class="card-text">
+                    <i class="bi bi-telephone-fill"></i>
+                    {{ contacts.phone }}
+                </p>
+                <p class="card-text">
+                    <i class="bi bi-whatsapp"></i>
+                    WhatsApp: {{ contacts.whatsapp }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">🏢 Адрес офиса</h5>
+                <p class="card-text">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    {{ contacts.address }}
+                </p>
+                <p class="card-text">
+                    <i class="bi bi-clock-fill"></i>
+                    Часы работы: {{ contacts.work_hours }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">💬 Мессенджеры</h5>
+                <p class="card-text">
+                    <i class="bi bi-telegram"></i>
+                    Telegram: {{ contacts.telegram }}
+                </p>
+                <p class="card-text">Обычно отвечаем в течение 15 минут в рабочее время</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bi {
+        font-size: 1.2rem;
+        margin-right: 10px;
+        color: #0d6efd;
+    }
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+</style>
+{% endblock %}

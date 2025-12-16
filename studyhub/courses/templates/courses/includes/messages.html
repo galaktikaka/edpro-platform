@@ -1,0 +1,23 @@
+<!-- Подшаблон для отображения системных сообщений -->
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-dismissible alert-{{ message.tags }} fade show" role="alert">
+        <!-- Используем разные иконки для разных типов сообщений -->
+        {% if message.tags == 'success' %}
+        <i class="bi bi-check-circle-fill"></i>
+        {% elif message.tags == 'error' or message.tags == 'danger' %}
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        {% elif message.tags == 'warning' %}
+        <i class="bi bi-exclamation-circle-fill"></i>
+        {% elif message.tags == 'info' %}
+        <i class="bi bi-info-circle-fill"></i>
+        {% endif %}
+        
+        {{ message }}
+        
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

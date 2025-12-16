@@ -1,0 +1,51 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Оформление заказа — EdPro{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Оформление заказа</h1>
+
+{% if courses %}
+    <p class="mb-3">Проверьте состав заказа. После подтверждения вам будет выдан доступ к выбранным курсам.</p>
+
+    <ul class="list-group mb-3">
+        {% for course in courses %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ course.title }}</strong><br>
+                <small class="text-muted">{{ course.description|truncatechars:80 }}</small>
+            </div>
+            <span>
+                {% if course.is_free %}
+                    <span class="badge bg-success">Бесплатный</span>
+                {% else %}
+                    {{ course.price }} ₽
+                {% endif %}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <p class="mb-1">Итого к оплате: <strong>{{ total_amount }} ₽</strong></p>
+            <small class="text-muted">Оплата имитируется для учебного проекта — реальные платежи не используются.</small>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-lg">
+                Подтвердить и «оплатить»
+            </button>
+        </form>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Ваша корзина пуста. Добавьте курсы в корзину перед оформлением заказа.
+    </div>
+    <a href="{% url 'course_list' %}" class="btn btn-primary">
+        Перейти к курсам
+    </a>
+{% endif %}
+{% endblock %}
+
+

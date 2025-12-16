@@ -1,0 +1,86 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}{% if form.instance.pk %}Редактирование модуля{% else %}Создание модуля{% endif %} - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'course_list' %}">Все курсы</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'course_detail' course.pk %}">{{ course.title }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'module_list' course.pk %}">Модули</a></li>
+            <li class="breadcrumb-item active">
+                {% if form.instance.pk %}Редактирование модуля{% else %}Создание модуля{% endif %}
+            </li>
+        </ol>
+    </nav>
+    
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>{% if form.instance.pk %}Редактирование модуля{% else %}Создание модуля{% endif %}</h1>
+            <p class="lead">Курс: {{ course.title }}</p>
+        </div>
+    </div>
+    
+    <!-- Форма -->
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">Название модуля</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {{ form.title.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {{ form.description.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.order.id_for_label }}" class="form-label">Порядковый номер</label>
+                    {{ form.order }}
+                    <div class="form-text">Определяет последовательность модулей в курсе</div>
+                    {% if form.order.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {{ form.order.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        {% if form.instance.pk %}Сохранить изменения{% else %}Создать модуль{% endif %}
+                    </button>
+                    <a href="{% url 'module_list' course.pk %}" class="btn btn-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для полей формы */
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+</style>
+{% endblock %}

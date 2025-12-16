@@ -1,0 +1,199 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}{{ module.title }} - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'course_list' %}">Все курсы</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'course_detail' module.course.pk %}">{{ module.course.title }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'module_list' module.course.pk %}">Модули</a></li>
+            <li class="breadcrumb-item active">{{ module.title }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Заголовок и информация -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="card-title">{{ module.title }}</h1>
+                    <p class="card-text">{{ module.description }}</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6">Модуль {{ module.order }}</span>
+                </div>
+            </div>
+            
+            <!-- Прогресс модуля (для студентов) -->
+            {% if user.is_authenticated and user != module.course.author and user_progress %}
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Ваш прогресс в модуле</h5>
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ user_progress.percentage }}%;" 
+                                     aria-valuenow="{{ user_progress.percentage }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ user_progress.percentage }}%
+                                </div>
+                            </div>
+                            <p class="card-text text-center">
+                                Пройдено уроков: <strong>{{ user_progress.completed_lessons }}/{{ user_progress.total_lessons }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+           <!-- Кнопки управления (для автора) -->
+{% if user == module.course.author %}
+<div class="mt-3">
+    <div class="btn-group" role="group">
+        <a href="{% url 'lesson_create' module.course.pk module.pk %}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Добавить урок
+        </a>
+        <a href="{% url 'module_edit' course_pk=module.course.pk module_pk=module.pk %}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Редактировать модуль
+        </a>
+        <a href="{% url 'module_delete' course_pk=module.course.pk module_pk=module.pk %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Удалить
+        </a>
+    </div>
+</div>
+{% endif %}
+            
+            <!-- Статистика модуля -->
+            <div class="row mt-3">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5>{{ lessons|length }}</h5>
+                            <p class="card-text">уроков</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5>{{ total_duration }}</h5>
+                            <p class="card-text">минут обучения</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5>{{ module.created_at|date:"d.m.Y" }}</h5>
+                            <p class="card-text">дата создания</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Список уроков с прогрессом -->
+    <h3 class="mb-3">Уроки модуля</h3>
+    
+    {% if lessons_with_progress or lessons %}
+    <div class="list-group">
+        {% for item in lessons_with_progress %}
+        <a href="{% url 'lesson_detail' module.course.pk module.pk item.lesson.pk %}" 
+           class="list-group-item list-group-item-action {% if item.completed %}list-group-item-success{% endif %}">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">
+                        {% if item.completed %}
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        {% endif %}
+                        {{ item.lesson.title }}
+                    </h5>
+                    <p class="mb-1 text-muted">{{ item.lesson.content|truncatechars:100 }}</p>
+                    {% if item.completed_at %}
+                    <small class="text-muted">
+                        <i class="bi bi-calendar-check"></i> Пройден: {{ item.completed_at|date:"d.m.Y H:i" }}
+                    </small>
+                    {% endif %}
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-secondary me-2">Урок {{ item.lesson.order }}</span>
+                    <span class="badge bg-info">{{ item.lesson.duration_minutes }} мин</span>
+                    {% if item.completed %}
+                    <span class="badge bg-success ms-2">
+                        <i class="bi bi-check-circle"></i> Пройден
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        {% for lesson in lessons %}
+        <a href="{% url 'lesson_detail' module.course.pk module.pk lesson.pk %}" 
+           class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">{{ lesson.title }}</h5>
+                    <p class="mb-1 text-muted">{{ lesson.content|truncatechars:100 }}</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-secondary me-2">Урок {{ lesson.order }}</span>
+                    <span class="badge bg-info">{{ lesson.duration_minutes }} мин</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <!-- Если уроков нет -->
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-book display-1 text-muted mb-3"></i>
+            <h3>В этом модуле пока нет уроков</h3>
+            <p class="text-muted">Добавьте первый урок, чтобы начать обучение</p>
+            
+            {% if user == module.course.author %}
+            <a href="{% url 'lesson_create' module.course.pk module.pk %}" class="btn btn-primary btn-lg mt-3">
+                <i class="bi bi-plus-circle"></i> Добавить первый урок
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Навигация -->
+    <div class="mt-4">
+        <a href="{% url 'module_list' module.course.pk %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку модулей
+        </a>
+    </div>
+    
+</div>
+
+{% block extra_js %}
+<script>
+    // Вычисляем общую продолжительность уроков
+    document.addEventListener('DOMContentLoaded', function() {
+        let totalDuration = 0;
+        
+        {% for lesson in lessons %}
+        totalDuration += {{ lesson.duration_minutes }};
+        {% endfor %}
+        
+        // Обновляем статистику
+        document.querySelectorAll('.total-duration').forEach(el => {
+            el.textContent = totalDuration;
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

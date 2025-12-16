@@ -1,0 +1,70 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Тест подбора курса — EdPro{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Подбор курса</h1>
+<p class="text-muted mb-4">
+    Ответьте на несколько простых вопросов — мы подберём для вас подходящие курсы.
+    В учебной версии используется простая фильтрация по направлению, уровню и бесплатности.
+ </p>
+
+<form method="get" class="mb-4">
+    <div class="mb-3">
+        <label class="form-label">Направление (интересующая тематика)</label>
+        <select name="direction" class="form-select">
+            <option value="">Не важно</option>
+            <option value="программирование">Программирование</option>
+            <option value="дизайн">Дизайн</option>
+            <option value="языки">Иностранные языки</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Ваш уровень</label>
+        <select name="level" class="form-select">
+            <option value="all">Любой</option>
+            <option value="beginner">Начальный</option>
+            <option value="middle">Средний</option>
+            <option value="advanced">Продвинутый</option>
+        </select>
+    </div>
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="free" id="freeCourses">
+        <label class="form-check-label" for="freeCourses">
+            Показывать только бесплатные курсы
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Показать рекомендации</button>
+</form>
+
+{% if result_courses %}
+    <h2 class="mb-3">Рекомендуемые курсы</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for course in result_courses %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.title }}</h5>
+                    <p class="card-text text-muted">{{ course.description|truncatechars:120 }}</p>
+                    <p class="mb-2">
+                        {% if course.is_free %}
+                            <span class="badge bg-success">Бесплатный</span>
+                        {% else %}
+                            <span class="badge bg-primary">{{ course.price }} ₽</span>
+                        {% endif %}
+                        <span class="badge bg-light text-dark ms-1">{{ course.get_level_display }}</span>
+                    </p>
+                    <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-primary btn-sm">
+                        Перейти к курсу
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% elif result_courses is not None %}
+    <div class="alert alert-info mt-4">
+        По заданным условиям курсы не найдены. Попробуйте изменить параметры.
+    </div>
+{% endif %}
+{% endblock %}
